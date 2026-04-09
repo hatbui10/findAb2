@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tool Lọc & Sắp Xếp Mn</title>
+    <title>Tool Lọc Pattern Mn - Dynamic Highlight</title>
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -38,7 +38,7 @@
 
         .result-item {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 18px;
+            font-size: 19px;
             padding: 6px 10px;
             border-bottom: 1px solid #252525;
             white-space: nowrap;
@@ -58,8 +58,11 @@
 
         .pattern-part { font-weight: bold; }
         .mn-part { color: #ff00ff; font-weight: bold; margin-left: 5px; border: 1px solid #444; padding: 0 2px; }
-        .suffix-part { color: #888; }
-        .suffix-highlight { color: #00f2ff !important; font-weight: bold; text-shadow: 0 0 5px #00bfff; }
+        
+        /* Phần 9 số mặc định */
+        .suffix-base { color: #888; }
+        /* Phần được highlight xanh da trời */
+        .high-blue { color: #00f2ff !important; font-weight: bold; text-shadow: 0 0 5px #00bfff; }
         
         input[type="number"] {
             padding: 5px; width: 50px; border-radius: 4px; border: 1px solid #444; 
@@ -74,13 +77,13 @@
 <div class="container">
     <div class="config-bar">
         <div style="display: flex; align-items: center; gap: 8px;">
-            <label>Độ dài Pattern:</label>
+            <label>Độ dài:</label>
             <input type="number" id="patternLen" value="4" min="2" oninput="saveConfig()">
         </div>
         
         <div class="controls">
-            <button class="btn-Ab" onclick="processData('Ab')">LỌC & SẮP XẾP AbAb...</button>
-            <button class="btn-bA" onclick="processData('bA')">LỌC & SẮP XẾP bAbA...</button>
+            <button class="btn-Ab" onclick="processData('Ab')">LỌC AbAb...</button>
+            <button class="btn-bA" onclick="processData('bA')">LỌC bAbA...</button>
             <span id="status-info"></span>
         </div>
 
@@ -107,17 +110,34 @@
 
     const isA = (c) => /[0-9]/.test(c) && parseInt(c) >= 5;
 
-    function isHomogeneous(str) {
-        if (!str) return false;
+    // Hàm xử lý chia chuỗi 9 số thành 2 phần: phần đồng nhất và phần còn lại
+    function splitSuffix(str) {
+        if (!str) return { highlighted: "", remaining: "" };
         let firstIsA = isA(str[0]);
+        let breakIndex = 1;
+        
         for (let i = 1; i < str.length; i++) {
-            if (isA(str[i]) !== firstIsA) return false;
+            if (isA(str[i]) === firstIsA) {
+                breakIndex++;
+            } else {
+                break;
+            }
         }
-        return true;
+        
+        // Điều kiện: Nếu có ít nhất 5 số đồng nhất thì mới tô màu (theo yêu cầu trước đó)
+        // Nếu bạn muốn tô màu kể cả khi chỉ có 1-2 số đồng nhất, hãy bỏ điều kiện if (breakIndex >= 5)
+        if (breakIndex >= 5) {
+            return {
+                highlighted: str.substring(0, breakIndex),
+                remaining: str.substring(breakIndex)
+            };
+        } else {
+            return { highlighted: "", remaining: str };
+        }
     }
 
     function saveConfig() {
-        localStorage.setItem('tool_pattern_len_v5', patternLenEl.value);
+        localStorage.setItem('tool_pattern_len_v7', patternLenEl.value);
     }
 
     function processData(mode) {
@@ -125,9 +145,9 @@
         const pLen = parseInt(patternLenEl.value) || 4;
         const mnLen = 2; 
         const sLen = 9;  
-        let dataObjects = []; // Chứa các đối tượng để sắp xếp
+        let dataObjects = [];
 
-        localStorage.setItem('tool_last_mode_v5', mode);
+        localStorage.setItem('tool_last_mode_v7', mode);
         cols.forEach(c => c.innerHTML = "");
 
         for (let i = 0; i <= text.length - (pLen + mnLen + sLen); i++) {
@@ -153,37 +173,37 @@
                     pattern: patternPart,
                     mn: mnPart,
                     suffix: suffixPart,
-                    mnValue: parseInt(mnPart) // Chuyển Mn thành số để so sánh
+                    mnValue: parseInt(mnPart)
                 });
             }
         }
 
-        // --- BƯỚC SẮP XẾP: Mn từ bé đến lớn ---
+        // Sắp xếp Mn bé -> lớn
         dataObjects.sort((a, b) => a.mnValue - b.mnValue);
 
-        // Chuyển đối tượng thành HTML
         let finalHTMLs = dataObjects.map(obj => {
             let pColor = mode === 'Ab' ? '#ffff00' : '#00bfff';
-            let suffixClass = isHomogeneous(obj.suffix) ? 'suffix-part suffix-highlight' : 'suffix-part';
+            
+            // Xử lý tách phần cần highlight trong 9 số
+            let parts = splitSuffix(obj.suffix);
             
             return `<div class="result-item">
                 <span class="pattern-part" style="color:${pColor}">${obj.pattern}</span>
                 <span class="mn-part">${obj.mn}</span>
                 <span style="color:#666"> - </span>
-                <span class="${suffixClass}">${obj.suffix}</span>
+                <span class="suffix-base"><span class="high-blue">${parts.highlighted}</span>${parts.remaining}</span>
             </div>`;
         });
 
-        // Chia vào 3 cột
         finalHTMLs.forEach((html, index) => {
             cols[index % 3].innerHTML += html;
         });
 
-        statusInfo.innerText = `Tìm thấy & Sắp xếp: ${finalHTMLs.length}`;
+        statusInfo.innerText = `Tìm thấy: ${finalHTMLs.length}`;
     }
 
     function clearAll() {
-        if(confirm("Xóa sạch kết quả và dữ liệu lưu trữ?")) {
+        if(confirm("Xóa sạch dữ liệu?")) {
             inputEl.value = "";
             cols.forEach(c => c.innerHTML = "");
             statusInfo.innerText = "";
@@ -197,7 +217,7 @@
             const r = new FileReader();
             r.onload = (ev) => { 
                 inputEl.value = ev.target.result; 
-                localStorage.setItem('tool_raw_data_v5', inputEl.value);
+                localStorage.setItem('tool_raw_data_v7', inputEl.value);
                 statusInfo.innerText = "Đã nạp file!";
             };
             r.readAsText(f);
@@ -205,9 +225,9 @@
     });
 
     window.onload = () => {
-        const savedData = localStorage.getItem('tool_raw_data_v5');
-        const savedLen = localStorage.getItem('tool_pattern_len_v5');
-        const lastMode = localStorage.getItem('tool_last_mode_v5');
+        const savedData = localStorage.getItem('tool_raw_data_v7');
+        const savedLen = localStorage.getItem('tool_pattern_len_v7');
+        const lastMode = localStorage.getItem('tool_last_mode_v7');
 
         if (savedData) inputEl.value = savedData;
         if (savedLen) patternLenEl.value = savedLen;
