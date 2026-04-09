@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Lọc Pattern + 6 Số</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #121212; 
+            color: #e0e0e0; 
+            margin: 20px;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+
+        .config-bar {
+            background: #1e1e1e; padding: 20px;
+            border-radius: 8px; border: 1px solid #333;
+            display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+        }
+
+        #inputText { display: none; }
+
+        .output-panel { 
+            height: calc(100vh - 300px); 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid #444; 
+            background-color: #181818; 
+            color: #ffffff;
+            font-size: 18px; 
+            overflow-y: auto; 
+            white-space: pre-wrap;
+            line-height: 2;
+            font-family: monospace;
+        }
+
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        button, .file-label { 
+            padding: 12px 24px; cursor: pointer; border: none; 
+            border-radius: 6px; font-weight: bold; font-size: 14px;
+            transition: 0.3s;
+        }
+        
+        .btn-Ab { background: #ffff00; color: #000; }
+        .btn-bA { background: #00bfff; color: #000; }
+        .btn-clear { background: #444; color: #fff; }
+        .btn-file { background: #3700b3; color: #fff; }
+
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
+
+        .pattern-part { font-weight: bold; text-decoration: underline; }
+        .suffix-part { color: #888; font-size: 16px; margin-right: 20px; }
+        
+        input[type="number"] {
+            padding: 8px; width: 60px; border-radius: 4px; border: 1px solid #444; 
+            background: #2c2c2c; color: #fff; text-align: center; font-size: 16px;
+        }
+        
+        #status-title { font-size: 14px; color: #aaa; margin-bottom: -10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="config-bar">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <label>Độ dài Pattern:</label>
+            <input type="number" id="patternLen" value="4" min="2">
+        </div>
+        
+        <div class="controls">
+            <button class="btn-Ab" onclick="processData('Ab')">LỌC DÃY AbAb...</button>
+            <button class="btn-bA" onclick="processData('bA')">LỌC DÃY bAbA...</button>
+        </div>
+
+        <div style="margin-left: auto; display: flex; gap: 10px;">
+            <label class="file-label btn-file">📁 CHỌN FILE <input type="file" id="fileInput" accept=".txt" style="display:none"></label>
+            <button class="btn-clear" onclick="clearAll()">🗑️ XÓA</button>
+        </div>
+    </div>
+
+    <div id="status-title">Kết quả hiển thị: Đang trống</div>
+    <div id="mainOutput" class="output-panel"></div>
+    
+    <textarea id="inputText"></textarea>
+</div>
+
+<script>
+    const inputEl = document.getElementById('inputText');
+    const outputEl = document.getElementById('mainOutput');
+    const patternLenEl = document.getElementById('patternLen');
+    const statusTitle = document.getElementById('status-title');
+
+    // Logic: A (5-9), b (0-4)
+    const isA = (c) => /[0-9]/.test(c) && parseInt(c) >= 5;
+
+    function processData(mode) {
+        const text = inputEl.value.replace(/[^0-9]/g, '');
+        const pLen = parseInt(patternLenEl.value) || 4;
+        const sLen = 6; // Độ dài chuỗi phía sau
+        let results = [];
+
+        statusTitle.innerText = `Đang hiển thị: Dãy ${mode} (Độ dài ${pLen}) + 6 số sau`;
+
+        for (let i = 0; i <= text.length - (pLen + sLen); i++) {
+            let patternPart = text.substring(i, i + pLen);
+            let suffixPart = text.substring(i + pLen, i + pLen + sLen);
+            
+            // Kiểm tra tính xen kẽ
+            let isValid = true;
+            // Xác định xem bắt đầu bằng A hay b theo mode yêu cầu
+            if (mode === 'Ab' && !isA(patternPart[0])) isValid = false;
+            if (mode === 'bA' && isA(patternPart[0])) isValid = false;
+
+            if (isValid) {
+                for (let k = 0; k < patternPart.length - 1; k++) {
+                    if (isA(patternPart[k]) === isA(patternPart[k+1])) {
+                        isValid = false;
+                        break;
+                    }
+                }
+            }
+
+            if (isValid) {
+                let color = mode === 'Ab' ? '#ffff00' : '#00bfff';
+                results.push(`<span class="item"><span class="pattern-part" style="color:${color}">${patternPart}</span> - <span class="suffix-part">${suffixPart}</span></span>`);
+            }
+        }
+
+        outputEl.innerHTML = results.length > 0 ? results.join("") : "Không tìm thấy kết quả nào.";
+    }
+
+    function clearAll() {
+        if(confirm("Xóa sạch dữ liệu?")) {
+            inputEl.value = "";
+            outputEl.innerHTML = "";
+            statusTitle.innerText = "Kết quả hiển thị: Đang trống";
+            localStorage.removeItem('saved_tool_pattern_v2');
+        }
+    }
+
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+        const f = e.target.files[0];
+        if (f) {
+            const r = new FileReader();
+            r.onload = (ev) => { 
+                inputEl.value = ev.target.result; 
+                localStorage.setItem('saved_tool_pattern_v2', inputEl.value);
+                alert("Đã nạp dữ liệu xong! Hãy bấm nút Lọc.");
+            };
+            r.readAsText(f);
+        }
+    });
+
+    window.onload = () => {
+        const saved = localStorage.getItem('saved_tool_pattern_v2');
+        if (saved) inputEl.value = saved;
+    };
+</script>
+</body>
+</html>
