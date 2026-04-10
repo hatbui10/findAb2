@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tool Lọc Pattern Mn - Dynamic Highlight</title>
+    <title>Tool Lọc Pattern Mn - Multi Mode</title>
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -51,17 +51,18 @@
             border-radius: 6px; font-weight: bold; font-size: 13px;
         }
         
+        /* Màu sắc các nút lọc */
         .btn-Ab { background: #ffff00; color: #000; }
         .btn-bA { background: #00bfff; color: #000; }
+        .btn-AA { background: #ff8c00; color: #fff; } /* Màu cam */
+        .btn-bb { background: #32cd32; color: #fff; } /* Màu xanh lá */
         .btn-clear { background: #444; color: #fff; }
         .btn-file { background: #3700b3; color: #fff; }
 
         .pattern-part { font-weight: bold; }
         .mn-part { color: #ff00ff; font-weight: bold; margin-left: 5px; border: 1px solid #444; padding: 0 2px; }
         
-        /* Phần 9 số mặc định */
         .suffix-base { color: #888; }
-        /* Phần được highlight xanh da trời */
         .high-blue { color: #00f2ff !important; font-weight: bold; text-shadow: 0 0 5px #00bfff; }
         
         input[type="number"] {
@@ -82,8 +83,10 @@
         </div>
         
         <div class="controls">
-            <button class="btn-Ab" onclick="processData('Ab')">LỌC AbAb...</button>
-            <button class="btn-bA" onclick="processData('bA')">LỌC bAbA...</button>
+            <button class="btn-Ab" onclick="processData('Ab')">LỌC AbAb</button>
+            <button class="btn-bA" onclick="processData('bA')">LỌC bAbA</button>
+            <button class="btn-AA" onclick="processData('AA')">LỌC AAAA</button>
+            <button class="btn-bb" onclick="processData('bb')">LỌC bbbb</button>
             <span id="status-info"></span>
         </div>
 
@@ -110,27 +113,16 @@
 
     const isA = (c) => /[0-9]/.test(c) && parseInt(c) >= 5;
 
-    // Hàm xử lý chia chuỗi 9 số thành 2 phần: phần đồng nhất và phần còn lại
     function splitSuffix(str) {
         if (!str) return { highlighted: "", remaining: "" };
         let firstIsA = isA(str[0]);
         let breakIndex = 1;
-        
         for (let i = 1; i < str.length; i++) {
-            if (isA(str[i]) === firstIsA) {
-                breakIndex++;
-            } else {
-                break;
-            }
+            if (isA(str[i]) === firstIsA) breakIndex++;
+            else break;
         }
-        
-        // Điều kiện: Nếu có ít nhất 5 số đồng nhất thì mới tô màu (theo yêu cầu trước đó)
-        // Nếu bạn muốn tô màu kể cả khi chỉ có 1-2 số đồng nhất, hãy bỏ điều kiện if (breakIndex >= 5)
         if (breakIndex >= 5) {
-            return {
-                highlighted: str.substring(0, breakIndex),
-                remaining: str.substring(breakIndex)
-            };
+            return { highlighted: str.substring(0, breakIndex), remaining: str.substring(breakIndex) };
         } else {
             return { highlighted: "", remaining: str };
         }
@@ -156,15 +148,27 @@
             let suffixPart = text.substring(i + pLen + mnLen, i + pLen + mnLen + sLen);
             
             let isValid = true;
-            if (mode === 'Ab' && !isA(patternPart[0])) isValid = false;
-            if (mode === 'bA' && isA(patternPart[0])) isValid = false;
 
-            if (isValid) {
-                for (let k = 0; k < patternPart.length - 1; k++) {
-                    if (isA(patternPart[k]) === isA(patternPart[k+1])) {
-                        isValid = false;
-                        break;
+            if (mode === 'Ab' || mode === 'bA') {
+                // Check xen kẽ
+                if (mode === 'Ab' && !isA(patternPart[0])) isValid = false;
+                if (mode === 'bA' && isA(patternPart[0])) isValid = false;
+                if (isValid) {
+                    for (let k = 0; k < patternPart.length - 1; k++) {
+                        if (isA(patternPart[k]) === isA(patternPart[k+1])) {
+                            isValid = false; break;
+                        }
                     }
+                }
+            } else if (mode === 'AA') {
+                // Check tất cả là A (số lớn >= 5)
+                for (let k = 0; k < patternPart.length; k++) {
+                    if (!isA(patternPart[k])) { isValid = false; break; }
+                }
+            } else if (mode === 'bb') {
+                // Check tất cả là b (số bé < 5)
+                for (let k = 0; k < patternPart.length; k++) {
+                    if (isA(patternPart[k])) { isValid = false; break; }
                 }
             }
 
@@ -178,15 +182,15 @@
             }
         }
 
-        // Sắp xếp Mn bé -> lớn
         dataObjects.sort((a, b) => a.mnValue - b.mnValue);
 
         let finalHTMLs = dataObjects.map(obj => {
-            let pColor = mode === 'Ab' ? '#ffff00' : '#00bfff';
+            let pColor = '#ffff00'; // Default Ab
+            if(mode === 'bA') pColor = '#00bfff';
+            if(mode === 'AA') pColor = '#ff8c00';
+            if(mode === 'bb') pColor = '#32cd32';
             
-            // Xử lý tách phần cần highlight trong 9 số
             let parts = splitSuffix(obj.suffix);
-            
             return `<div class="result-item">
                 <span class="pattern-part" style="color:${pColor}">${obj.pattern}</span>
                 <span class="mn-part">${obj.mn}</span>
@@ -199,7 +203,7 @@
             cols[index % 3].innerHTML += html;
         });
 
-        statusInfo.innerText = `Tìm thấy: ${finalHTMLs.length}`;
+        statusInfo.innerText = `Tìm thấy: ${finalHTMLs.length} (${mode})`;
     }
 
     function clearAll() {
