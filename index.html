@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phân tích số liệu Pro - Căn chỉnh lề</title>
+    <title>Phân tích số liệu - Giao diện tối giản</title>
     <style>
         :root {
-            --primary: #007bff;
-            --bg-high: #ffd700; 
-            --bg-low: #4caf50;  
             --body-bg: #121212;
-            --card-bg: #1e1e1e;
             --text-color: #e0e0e0;
-            --input-bg: #2d2d2d;
-            --control-bg: #252525;
+            --input-bg: #1e1e1e;
             --border-color: #333;
             --cell-size: 30px;
             --cell-gap: 5px;
+            --bg-high: #ffd700; 
+            --bg-low: #4caf50;  
         }
 
         body {
@@ -24,53 +21,48 @@
             background-color: var(--body-bg);
             color: var(--text-color);
             margin: 0;
-            padding: 10px;
+            padding: 10px 0; /* Padding dọc cho trang */
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         .container {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             width: 100%;
             max-width: 1200px;
+        }
+
+        h2 { font-size: 1.2rem; text-align: center; margin-bottom: 20px; color: #666; }
+
+        /* THANH STT - TÀNG HÌNH */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--body-bg); /* Nền trùng màu máy để che số khi cuộn */
+            padding: 10px 3px; /* Cách mép đúng 3px */
+            overflow-x: hidden;
+            display: block;
+        }
+
+        /* VÙNG KẾT QUẢ - TÀNG HÌNH */
+        #result-container { 
+            width: 100%;
+            overflow-x: auto; 
+            padding: 10px 3px; /* Cách mép đúng 3px */
+            -webkit-overflow-scrolling: touch;
             box-sizing: border-box;
         }
 
-        /* Hộp nổi cố định */
-        .sticky-header {
-            position: sticky;
-            top: 5px;
-            z-index: 100;
-            background: var(--control-bg);
-            padding: 15px 3px; /* Đã bổ sung 3px trái phải ở đây */
-            border-radius: 10px;
-            border: 2px solid #444;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            overflow-x: hidden; 
-        }
-
-        .header-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #888;
-            margin-bottom: 10px;
-            text-align: center;
-            font-weight: bold;
-        }
-
+        /* GRID ĐỒNG BỘ */
         .sync-grid {
             display: grid;
             gap: var(--cell-gap);
             justify-content: start;
             width: max-content;
-            /* Loại bỏ margin auto để sát về lề trái có padding */
         }
 
+        /* Ô SỐ THỨ TỰ (0-9) */
         .index-box {
             width: var(--cell-size);
             height: var(--cell-size);
@@ -81,9 +73,10 @@
             font-weight: bold;
             font-size: 16px;
             color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* Màu STT lung linh */
+        /* Màu Gradient STT */
         .idx-0 { background: linear-gradient(135deg, #ff4b1f, #ff9068); }
         .idx-1 { background: linear-gradient(135deg, #1fddff, #1291ff); }
         .idx-2 { background: linear-gradient(135deg, #ff00cc, #333399); }
@@ -95,44 +88,7 @@
         .idx-8 { background: linear-gradient(135deg, #eb3349, #f45c43); }
         .idx-9 { background: linear-gradient(135deg, #4568dc, #b06ab3); }
 
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            background: var(--control-bg);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .control-group { display: flex; flex-direction: column; gap: 5px; }
-        label { font-weight: bold; font-size: 13px; color: #aaa; }
-        input { 
-            padding: 10px; 
-            border: 1px solid var(--border-color); 
-            border-radius: 6px; 
-            background: var(--input-bg); 
-            color: white; 
-            font-size: 16px; 
-        }
-
-        .btn-group { display: flex; gap: 8px; margin-top: 5px; }
-        .main-btn { flex: 1; color: white; border: none; padding: 12px 5px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-high { background-color: #b8860b; }
-        .btn-low { background-color: #2e7d32; }
-
-        /* Vùng kết quả cuộn ngang */
-        #result-container { 
-            overflow-x: auto; 
-            width: 100%;
-            background: #1a1a1a;
-            padding: 15px 3px; /* Đã bổ sung 3px trái phải ở đây */
-            border-radius: 8px;
-            -webkit-overflow-scrolling: touch;
-            box-sizing: border-box;
-        }
-
+        /* Ô SỐ KẾT QUẢ */
         .number-box {
             width: var(--cell-size);
             height: var(--cell-size);
@@ -142,38 +98,55 @@
             font-weight: bold;
             border-radius: 4px;
             font-size: 18px;
-            background: #333;
+            background: #2a2a2a;
             color: #fff;
         }
 
         .high { background-color: var(--bg-high) !important; color: #000 !important; box-shadow: 0 0 8px var(--bg-high); }
         .low { background-color: var(--bg-low) !important; color: #fff !important; box-shadow: 0 0 8px var(--bg-low); }
 
-        @media (min-width: 600px) {
-            .controls { flex-direction: row; align-items: flex-end; }
+        /* BỘ ĐIỀU KHIỂN */
+        .controls {
+            margin: 20px 10px;
+            padding: 15px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
+
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 13px; color: #888; }
+        input { padding: 12px; border: 1px solid #333; border-radius: 6px; background: #2d2d2d; color: white; font-size: 16px; }
+
+        .btn-group { display: flex; gap: 10px; }
+        .main-btn { flex: 1; border: none; padding: 12px; border-radius: 6px; font-weight: bold; color: white; cursor: pointer; }
+        .btn-high { background: #b8860b; }
+        .btn-low { background: #2e7d32; }
+
+        @media (min-width: 600px) { .controls { flex-direction: row; align-items: flex-end; } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="sticky-header" id="headerWrapper">
-        <div class="header-title">Thanh đối chiếu STT</div>
         <div id="header-grid" class="sync-grid"></div>
     </div>
 
     <div class="controls">
         <div class="control-group">
-            <label>Chọn File (.txt)</label>
+            <label>File dữ liệu</label>
             <input type="file" id="fileInput" accept=".txt">
         </div>
         <div class="control-group">
-            <label>Độ dài dòng (x)</label>
+            <label>Độ dài (x)</label>
             <input type="number" id="rowLength" value="10" min="1">
         </div>
         <div class="btn-group">
-            <button class="main-btn btn-high" onclick="processData('high')">TÔ VÀNG (≥5)</button>
-            <button class="main-btn btn-low" onclick="processData('low')">TÔ XANH (<5)</button>
+            <button class="main-btn btn-high" onclick="processData('high')">TÔ VÀNG</button>
+            <button class="main-btn btn-low" onclick="processData('low')">TÔ XANH</button>
         </div>
     </div>
 
@@ -188,6 +161,7 @@
     const resultContainer = document.getElementById('result-container');
     const headerWrapper = document.getElementById('headerWrapper');
 
+    // Đồng bộ cuộn ngang
     resultContainer.onscroll = function() {
         headerWrapper.scrollLeft = resultContainer.scrollLeft;
     };
@@ -223,6 +197,7 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const rawText = e.target.result;
+            // Xử lý dữ liệu bỏ qua [source] và dấu \
             const cleanText = rawText.replace(/\\/g, ' ').replace(/\\/gi, ' ');
             const numbers = cleanText.trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
             renderGrid(numbers, x, mode);
