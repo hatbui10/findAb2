@@ -34,7 +34,7 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             width: 100%;
-            max-width: 95%; /* Mở rộng một chút để chứa các ô 18px */
+            max-width: 95%;
         }
 
         h2 { color: var(--text-color); text-align: center; margin-bottom: 25px; }
@@ -78,10 +78,12 @@
             cursor: pointer;
             font-weight: bold;
             height: 45px;
+            transition: 0.2s;
         }
 
         .btn-high { background-color: #b8860b; }
         .btn-low { background-color: #2e7d32; }
+        button:active { transform: scale(0.98); }
 
         #result-container {
             margin-top: 20px;
@@ -92,12 +94,11 @@
 
         #result-grid {
             display: grid;
-            gap: 4px; /* Giảm gap một chút để cân đối */
+            gap: 4px;
             justify-content: start;
         }
 
         .number-box {
-            /* Kích thước yêu cầu 30x30 */
             width: 30px;
             height: 30px;
             display: flex;
@@ -105,13 +106,11 @@
             align-items: center;
             font-weight: bold;
             border-radius: 4px;
-            /* Font size yêu cầu 18 */
             font-size: 18px;
             background: #333;
             color: #fff;
             transition: 0.2s;
         }
-        .number-box:hover { transform: scale(1.1); z-index: 2; }
 
         .high { background-color: var(--bg-high) !important; color: #000 !important; }
         .low { background-color: var(--bg-low) !important; color: #fff !important; }
@@ -144,7 +143,7 @@
         </div>
         <div class="control-group">
             <label for="rowLength">Độ dài mỗi dòng (x)</label>
-            <input type="number" id="rowLength" value="20" min="1" autofocus>
+            <input type="number" id="rowLength" value="10" min="1" autofocus>
         </div>
         
         <div class="btn-group">
@@ -159,13 +158,31 @@
 </div>
 
 <script>
+    const rowLengthInput = document.getElementById('rowLength');
+
+    // 1. LocalStorage: Khi load trang, lấy giá trị đã lưu
     window.onload = function() {
-        document.getElementById('rowLength').focus();
+        const savedLength = localStorage.getItem('userRowLength');
+        if (savedLength) {
+            rowLengthInput.value = savedLength;
+        }
+        rowLengthInput.focus();
     };
+
+    // Lưu giá trị vào LocalStorage mỗi khi người dùng thay đổi số x
+    rowLengthInput.addEventListener('input', function() {
+        localStorage.setItem('userRowLength', rowLengthInput.value);
+    });
+
+    document.getElementById('rowLength').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            // Mặc định Enter sẽ chạy nút tô vàng
+            processData('high');
+        }
+    });
 
     function processData(mode) {
         const fileInput = document.getElementById('fileInput');
-        const rowLengthInput = document.getElementById('rowLength');
         const x = parseInt(rowLengthInput.value);
 
         if (!fileInput.files[0]) {
@@ -173,13 +190,14 @@
             return;
         }
         if (isNaN(x) || x <= 0) {
-            alert("Vui lòng nhập độ dài dòng!");
+            alert("Vui lòng nhập độ dài dòng hợp lệ!");
             return;
         }
 
         const reader = new FileReader();
         reader.onload = function(e) {
             const rawText = e.target.result;
+            // Xử lý regex cơ bản để lấy số
             const cleanText = rawText.replace(/\\/g, ' ');
             const numbers = cleanText.trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
 
@@ -195,7 +213,6 @@
     function renderGrid(data, columns, mode) {
         const grid = document.getElementById('result-grid');
         grid.innerHTML = ''; 
-        // Thiết lập cột khớp với độ rộng ô 30px
         grid.style.gridTemplateColumns = `repeat(${columns}, 30px)`;
 
         data.forEach(num => {
