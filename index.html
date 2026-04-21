@@ -3,139 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phân tích số liệu - Tùy chỉnh T1</title>
+    <title>Phân tích số liệu - Bộ nhớ thông minh</title>
     <style>
         :root {
-            --body-bg: #121212;
-            --text-color: #e0e0e0;
-            --input-bg: #1e1e1e;
-            --border-color: #333;
-            --cell-size: 30px;
-            --cell-gap: 5px;
-            --bg-high: #ffd700; 
-            --bg-low: #4caf50;  
+            --body-bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --input-bg: #262626;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
             --primary: #007bff;
+            --gold: #ffd700;
+            --green: #4caf50;
+            --danger: #dc3545;
+            --cell-size: 34px;
+            --gap: 4px;
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--body-bg);
-            color: var(--text-color);
+            color: var(--text-main);
             margin: 0;
-            padding: 10px 0;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
-        }
-
-        .info-bar {
-            text-align: center;
-            font-size: 14px;
-            color: #aaa;
-            margin: 10px 0;
-            padding: 8px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 5px;
-        }
-        #total-count { color: var(--bg-high); font-weight: bold; font-size: 16px; }
+        .container { width: 100%; max-width: 850px; }
 
         .sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: var(--body-bg);
-            padding: 10px 3px; 
-            overflow-x: hidden;
-            display: block;
+            position: sticky; top: 0; z-index: 100;
+            background: var(--body-bg); padding: 10px 0;
+            overflow-x: auto; scrollbar-width: none;
         }
-
-        #result-container { 
-            width: 100%;
-            overflow-x: auto; 
-            padding: 10px 3px; 
-            -webkit-overflow-scrolling: touch;
-            box-sizing: border-box;
-        }
-
-        .sync-grid {
-            display: grid;
-            gap: var(--cell-gap);
-            justify-content: start;
-            width: max-content;
-        }
-
-        .index-box {
-            width: var(--cell-size);
-            height: var(--cell-size);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 16px;
-            color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .idx-0 { background: linear-gradient(135deg, #ff4b1f, #ff9068); }
-        .idx-1 { background: linear-gradient(135deg, #1fddff, #1291ff); }
-        .idx-2 { background: linear-gradient(135deg, #ff00cc, #333399); }
-        .idx-3 { background: linear-gradient(135deg, #00f260, #0575e6); }
-        .idx-4 { background: linear-gradient(135deg, #f12711, #f5af19); }
-        .idx-5 { background: linear-gradient(135deg, #8e2de2, #4a00e0); }
-        .idx-6 { background: linear-gradient(135deg, #f953c6, #b91d73); }
-        .idx-7 { background: linear-gradient(135deg, #11998e, #38ef7d); }
-        .idx-8 { background: linear-gradient(135deg, #eb3349, #f45c43); }
-        .idx-9 { background: linear-gradient(135deg, #4568dc, #b06ab3); }
-
-        .number-box {
-            width: var(--cell-size);
-            height: var(--cell-size);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            border-radius: 4px;
-            font-size: 18px;
-            background: #2a2a2a;
-            color: #fff;
-        }
-
-        .high { background-color: var(--bg-high) !important; color: #000 !important; box-shadow: 0 0 8px var(--bg-high); }
-        .low { background-color: var(--bg-low) !important; color: #fff !important; box-shadow: 0 0 8px var(--bg-low); }
+        .sticky-header::-webkit-scrollbar { display: none; }
 
         .controls {
-            margin: 20px 10px;
-            padding: 15px;
-            background: #1e1e1e;
-            border-radius: 10px;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
+            background: var(--card-bg); border-radius: 12px;
+            padding: 15px; margin-bottom: 15px;
+            display: flex; flex-direction: column; gap: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
-        @media (min-width: 768px) {
-            .controls { grid-template-columns: repeat(3, 1fr); align-items: flex-end; }
+        .row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .control-group { flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 11px; color: var(--text-dim); font-weight: 700; text-transform: uppercase; }
+
+        input {
+            background: var(--input-bg); border: 1px solid #333;
+            border-radius: 8px; padding: 10px; color: white;
+            font-size: 14px; outline: none;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .btn-group { display: flex; gap: 8px; width: 100%; }
+        .main-btn {
+            flex: 1; border: none; padding: 12px; border-radius: 8px;
+            font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 12px;
+        }
+        .btn-apply { background: var(--primary); color: white; }
+        .btn-reset { background: var(--danger); color: white; flex: 0 0 100px; }
+        .btn-high { background: var(--gold); color: black; }
+        .btn-low { background: var(--green); color: white; }
+        .main-btn:active { transform: scale(0.96); }
+
+        .info-bar {
+            background: rgba(255,255,255,0.05); padding: 12px;
+            border-radius: 8px; text-align: center; font-size: 13px;
+            margin-bottom: 15px; border: 1px solid #333;
         }
 
-        .control-group { display: flex; flex-direction: column; gap: 5px; }
-        .input-with-btn { display: flex; gap: 5px; }
-        .input-with-btn input { flex: 1; }
-        
-        label { font-size: 13px; color: #888; }
-        input { padding: 12px; border: 1px solid #333; border-radius: 6px; background: #2d2d2d; color: white; font-size: 16px; }
+        #result-container {
+            width: 100%; overflow-x: auto; background: #000;
+            border-radius: 8px; padding: 10px; box-sizing: border-box;
+        }
 
-        .main-btn { border: none; padding: 12px; border-radius: 6px; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; }
-        .main-btn:active { transform: scale(0.95); }
-        .btn-apply { background: #007bff; width: 100px; }
-        .btn-high { background: #b8860b; flex: 1; }
-        .btn-low { background: #2e7d32; flex: 1; }
-        .btn-group { display: flex; gap: 10px; }
+        .sync-grid { display: grid; gap: var(--gap); width: max-content; }
+
+        .number-box, .index-box {
+            width: var(--cell-size); height: var(--cell-size);
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; border-radius: 6px; font-size: 15px;
+        }
+
+        .index-box { color: white; font-size: 11px; }
+        .idx-0 { background: #ff4b1f; } .idx-1 { background: #1291ff; } 
+        .idx-2 { background: #ff00cc; } .idx-3 { background: #00f260; }
+        .idx-4 { background: #f5af19; } .idx-5 { background: #8e2de2; }
+        .idx-6 { background: #b91d73; } .idx-7 { background: #11998e; }
+        .idx-8 { background: #eb3349; } .idx-9 { background: #4568dc; }
+
+        .number-box { background: #222; color: #777; transition: 0.3s; }
+        .high { background-color: var(--gold) !important; color: #000 !important; box-shadow: 0 0 12px var(--gold); }
+        .low { background-color: var(--green) !important; color: #fff !important; }
     </style>
 </head>
 <body>
@@ -146,35 +107,35 @@
     </div>
 
     <div class="controls">
-        <div class="control-group">
-            <label>File dữ liệu</label>
-            <input type="file" id="fileInput" accept=".txt">
-        </div>
-
-        <div class="control-group">
-            <label>Chuỗi T1 (A: >=5, b: <5)</label>
-            <div class="input-with-btn">
-                <input type="text" id="t1Input" placeholder="VD: AAAbbbAAbb">
-                <button class="main-btn btn-apply" onclick="applyT1()">ÁP DỤNG</button>
+        <div class="row">
+            <div class="control-group">
+                <label>File dữ liệu (.txt)</label>
+                <input type="file" id="fileInput" accept=".txt">
+            </div>
+            <div class="control-group">
+                <label>Độ dài dòng (x)</label>
+                <input type="number" id="rowLength" value="10" min="1">
             </div>
         </div>
 
         <div class="control-group">
-            <label>Độ dài dòng (x)</label>
-            <input type="number" id="rowLength" value="10" min="1">
-        </div>
-
-        <div class="control-group" style="grid-column: span 3;">
+            <label>Chuỗi quy tắc T1 (A: >=5, B: <5)</label>
             <div class="btn-group">
-                <button class="main-btn btn-high" onclick="processData('high')">TÔ VÀNG THEO T1</button>
-                <button class="main-btn btn-low" onclick="processData('low')">TÔ XANH (< 5)</button>
+                <input type="text" id="t1Input" style="flex: 1;" placeholder="VD: AAAb">
+                <button class="main-btn btn-apply" onclick="applyT1()">ÁP DỤNG</button>
+                <button class="main-btn btn-reset" onclick="clearMemory()">RESET CACHE</button>
             </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="main-btn btn-high" onclick="processData('high')">TÔ VÀNG (DÃY 5 NGƯỢC)</button>
+            <button class="main-btn btn-low" onclick="processData('low')">TÔ XANH (<5)</button>
         </div>
     </div>
 
     <div class="info-bar">
-        Chuỗi đang dùng: <span id="current-t1-display" style="color: cyan; font-weight: bold;">--</span> 
-        | Tổng số: <span id="total-count">0</span>
+        Quy tắc: <span id="current-t1-display" style="color: #00d4ff; font-weight: bold;">--</span> | 
+        Tổng số: <span id="total-count" style="color: var(--gold);">0</span>
     </div>
 
     <div id="result-container">
@@ -188,22 +149,21 @@
     const t1Input = document.getElementById('t1Input');
     const currentT1Display = document.getElementById('current-t1-display');
     const headerGrid = document.getElementById('header-grid');
+    const resultGrid = document.getElementById('result-grid');
     const resultContainer = document.getElementById('result-container');
     const headerWrapper = document.getElementById('headerWrapper');
     const totalCountSpan = document.getElementById('total-count');
 
     let currentNumbers = []; 
 
-    resultContainer.onscroll = function() {
+    resultContainer.addEventListener('scroll', () => {
         headerWrapper.scrollLeft = resultContainer.scrollLeft;
-    };
+    });
 
     window.onload = function() {
-        // Load cấu hình cũ
-        const savedLength = localStorage.getItem('userRowLength');
-        if (savedLength) rowLengthInput.value = savedLength;
-
-        const savedT1 = localStorage.getItem('userT1') || 'AAAbbbAAbb';
+        // Khôi phục từ LocalStorage
+        rowLengthInput.value = localStorage.getItem('userRowLength') || 10;
+        const savedT1 = localStorage.getItem('userT1') || 'AAAb';
         t1Input.value = savedT1;
         currentT1Display.textContent = savedT1;
         
@@ -211,48 +171,49 @@
         if (savedData) {
             currentNumbers = JSON.parse(savedData);
             totalCountSpan.textContent = currentNumbers.length;
-            const savedMode = localStorage.getItem('userLastMode') || '';
-            renderGrid(currentNumbers, parseInt(rowLengthInput.value), savedMode);
+            refreshAll();
         }
         updateHeaderGrid();
     };
 
+    function clearMemory() {
+        if(confirm("Xóa toàn bộ thiết lập và dữ liệu đã lưu?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
+    function refreshAll() {
+        const x = parseInt(rowLengthInput.value) || 10;
+        const mode = localStorage.getItem('userLastMode') || '';
+        updateHeaderGrid();
+        renderGrid(currentNumbers, x, mode);
+    }
+
     function applyT1() {
         const val = t1Input.value.trim();
-        if(!val) {
-            alert("Vui lòng nhập chuỗi T1!");
-            return;
-        }
+        if(!val) return alert("Vui lòng nhập T1!");
         localStorage.setItem('userT1', val);
         currentT1Display.textContent = val;
-        // Re-render nếu đã có dữ liệu
-        if (currentNumbers.length > 0) {
-            const lastMode = localStorage.getItem('userLastMode') || '';
-            renderGrid(currentNumbers, parseInt(rowLengthInput.value), lastMode);
-        }
+        localStorage.setItem('userLastMode', 'high');
+        refreshAll();
     }
 
     fileInput.addEventListener('change', function() {
         if (!this.files[0]) return;
         const reader = new FileReader();
         reader.onload = function(e) {
-            const rawText = e.target.result;
-            const cleanText = rawText.replace(/\\/g, ' ');
-            currentNumbers = cleanText.trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
+            currentNumbers = e.target.result.replace(/\\/g, ' ').trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
             localStorage.setItem('userCurrentNumbers', JSON.stringify(currentNumbers));
             totalCountSpan.textContent = currentNumbers.length;
-            renderGrid(currentNumbers, parseInt(rowLengthInput.value), '');
+            refreshAll();
         };
         reader.readAsText(this.files[0]);
     });
 
-    rowLengthInput.addEventListener('input', function() {
+    rowLengthInput.addEventListener('input', () => {
         localStorage.setItem('userRowLength', rowLengthInput.value);
-        updateHeaderGrid();
-        if (currentNumbers.length > 0) {
-            const lastMode = localStorage.getItem('userLastMode') || '';
-            renderGrid(currentNumbers, parseInt(this.value), lastMode);
-        }
+        refreshAll();
     });
 
     function updateHeaderGrid() {
@@ -260,71 +221,53 @@
         headerGrid.style.gridTemplateColumns = `repeat(${x}, var(--cell-size))`;
         headerGrid.innerHTML = '';
         for (let i = 0; i < x; i++) {
-            const stt = i % 10;
             const box = document.createElement('div');
-            box.className = `index-box idx-${stt}`;
-            box.textContent = stt;
+            box.className = `index-box idx-${i % 10}`;
+            box.textContent = i % 10;
             headerGrid.appendChild(box);
         }
     }
 
     function processData(mode) {
-        if (currentNumbers.length === 0) {
-            alert("Vui lòng tải file dữ liệu!");
-            return;
-        }
+        if (currentNumbers.length === 0) return alert("Chưa có dữ liệu!");
         localStorage.setItem('userLastMode', mode);
-        renderGrid(currentNumbers, parseInt(rowLengthInput.value), mode);
+        refreshAll();
     }
 
     function renderGrid(data, columns, mode) {
-        const grid = document.getElementById('result-grid');
-        grid.innerHTML = ''; 
-        grid.style.gridTemplateColumns = `repeat(${columns}, var(--cell-size))`;
-
-        const T1 = t1Input.value.trim() || 'AAAbbbAAbb';
+        resultGrid.innerHTML = ''; 
+        if (data.length === 0) return;
+        resultGrid.style.gridTemplateColumns = `repeat(${columns}, var(--cell-size))`;
+        
+        const T1 = t1Input.value.trim() || 'AAAb';
+        const t1Len = T1.length;
         const highlightYellow = new Array(data.length).fill(false);
 
         if (mode === 'high') {
-            // Bước 1: Map vi phạm theo chuỗi T1 động
             const violationMap = data.map((num, i) => {
-                const rule = T1[i % T1.length];
-                if (rule === 'A' || rule === 'a') return num < 5;
-                if (rule === 'b' || rule === 'B') return num >= 5;
+                const char = T1[i % t1Len].toUpperCase();
+                if (char === 'A') return num < 5;
+                if (char === 'B') return num >= 5;
                 return false;
             });
 
-            // Bước 2: Kiểm tra dãy 5 số liên tiếp vi phạm toàn bộ
             for (let i = 0; i <= data.length - 5; i++) {
-                let isSequenceViolated = true;
-                for (let j = 0; j < 5; j++) {
-                    if (!violationMap[i + j]) {
-                        isSequenceViolated = false;
-                        break;
-                    }
-                }
-                
-                if (isSequenceViolated) {
-                    for (let j = 0; j < 5; j++) {
-                        highlightYellow[i + j] = true;
-                    }
+                if (violationMap[i] && violationMap[i+1] && violationMap[i+2] && violationMap[i+3] && violationMap[i+4]) {
+                    for (let j = 0; j < 5; j++) highlightYellow[i + j] = true;
                 }
             }
         }
 
-        // Bước 3: Vẽ
+        const fragment = document.createDocumentFragment();
         data.forEach((num, index) => {
             const box = document.createElement('div');
             box.className = 'number-box';
             box.textContent = num;
-
-            if (mode === 'high' && highlightYellow[index]) {
-                box.classList.add('high');
-            } else if (mode === 'low' && num < 5) {
-                box.classList.add('low');
-            }
-            grid.appendChild(box);
+            if (mode === 'high' && highlightYellow[index]) box.classList.add('high');
+            else if (mode === 'low' && num < 5) box.classList.add('low');
+            fragment.appendChild(box);
         });
+        resultGrid.appendChild(fragment);
     }
 </script>
 
