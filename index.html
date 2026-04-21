@@ -224,7 +224,7 @@
         if (!currentNumbers.length) return alert("Chưa có file!");
         listItems.innerHTML = ''; searchResults.style.display = 'block';
         let found = 0;
-        for (let x = 2; x <= 10; x++) {
+        for (let x = 2; x <= 9; x++) {
             for (let k = 1; k <= 30; k++) {
                 const u = checkU(currentNumbers, x, k);
                 if (u >= 0 && u <= 1) {
