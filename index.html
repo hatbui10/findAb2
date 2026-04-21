@@ -91,6 +91,7 @@
         .low { background: var(--green) !important; color: #000 !important; }
 
         /* HEADER MÀU SẮC */
+        .idx-box { border: 1px solid rgba(255,255,255,0.1); }
         .idx-0 { background: #ff4b1f; } .idx-1 { background: #0052D4; } 
         .idx-2 { background: #8E2DE2; } .idx-3 { background: #11998e; }
         .idx-4 { background: #f09819; } .idx-5 { background: #4568dc; }
@@ -163,7 +164,6 @@
 
     let currentNumbers = [];
 
-    // --- ĐỒNG BỘ CUỘN GIỮA HEADER VÀ NỘI DUNG ---
     resultContainer.addEventListener('scroll', () => {
         headerWrapper.scrollLeft = resultContainer.scrollLeft;
     });
@@ -210,7 +210,8 @@
     function updateHeader(x) {
         const grid = document.getElementById('header-grid');
         grid.style.gridTemplateColumns = `var(--stt-width) var(--spacer-width) repeat(${x}, var(--cell-size))`;
-        grid.innerHTML = '<div style="width:var(--stt-width)"></div><div style="width:var(--spacer-width)"></div>';
+        // Thêm 1 ô stt trống (row-stt style) và 1 ô spacer trống
+        grid.innerHTML = '<div class="row-stt" style="background:transparent; border:1px dashed #333"></div><div style="width:var(--spacer-width)"></div>';
         for (let i = 0; i < x; i++) {
             const box = document.createElement('div');
             box.className = `index-box idx-${i % 10}`;
