@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P%</title>
+    <title>Phân tích số liệu - Header Màu & Blink Nhẹ</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Inter:wght@400;600;800&display=swap');
 
@@ -12,22 +12,17 @@
             --card-bg: #16161e;
             --input-bg: #1f1f29;
             --text-main: #e1e1e6;
-            --text-dim: #9494b8;
             --primary: #3d5afe;
             --gold: #ffcc00;
             --green: #00e676;
             --danger: #ff5252;
-            
-            /* KÍCH THƯỚC Ô - SỬA Ở ĐÂY LÀ KHỚP CẢ BẢNG */
             --cell-size: 32px; 
             --stt-width: 45px;
             --spacer-width: 15px;
             --gap: 3px;
-            --radius: 8px;
         }
 
-        * { box-sizing: border-box; } /* Quan trọng: giúp border không làm tăng size ô */
-
+        * { box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--body-bg);
@@ -38,116 +33,82 @@
 
         .container { width: 100%; max-width: 1200px; }
 
-        /* HEADER */
+        #status-bar {
+            width: 100%; padding: 10px; border-radius: 6px;
+            margin-bottom: 10px; font-size: 13px; font-weight: 600;
+            text-align: center; display: none; border: 1px solid transparent;
+        }
+        .status-info { background: rgba(61, 90, 254, 0.1); color: var(--primary); border-color: var(--primary); }
+        .status-success { background: rgba(0, 230, 118, 0.1); color: var(--green); border-color: var(--green); }
+
         .sticky-header {
             position: sticky; top: 0; z-index: 100;
             background: var(--body-bg);
-            padding: 10px 0;
-            border-bottom: 2px solid #333;
+            padding: 10px 0; border-bottom: 2px solid #333;
             overflow: hidden;
         }
+        .header-content { display: flex; width: max-content; padding-left: 10px; }
 
-        .header-content {
-            display: flex;
-            width: max-content;
-            padding-left: 10px;
-        }
-
-        /* CONTROLS */
         .controls {
             background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 15px; margin: 15px 0;
-            display: flex; flex-direction: column; gap: 12px;
-            border: 1px solid #2d2d3d;
+            border-radius: 8px; padding: 15px; margin: 15px 0;
+            display: flex; flex-direction: column; gap: 12px; border: 1px solid #2d2d3d;
         }
-
-        .row { display: flex; gap: 10px; flex-wrap: wrap; }
-        .control-group { flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 4px; }
-        label { font-size: 10px; color: var(--text-dim); font-weight: 700; text-transform: uppercase; }
+        .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+        .control-group { flex: 1; min-width: 120px; display: flex; flex-direction: column; gap: 4px; }
+        label { font-size: 10px; color: #9494b8; font-weight: 700; text-transform: uppercase; }
 
         input {
             background: var(--input-bg);
             border: 1px solid #333; border-radius: 6px;
             padding: 8px 10px; color: white;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'JetBrains Mono', monospace; outline: none;
         }
 
-        .btn-group { display: flex; gap: 8px; }
         .main-btn {
-            flex: 1; border: none; padding: 10px; border-radius: 6px;
+            border: none; padding: 10px 15px; border-radius: 6px;
             font-weight: 700; cursor: pointer; font-size: 11px;
-            text-transform: uppercase;
+            text-transform: uppercase; transition: 0.2s;
         }
-        .btn-apply { background: var(--primary); color: white; }
-        .btn-reset { background: #333; color: white; }
+        .active-mode { outline: 2px solid white; outline-offset: 2px; }
 
-        /* GRID SYSTEM */
         #result-container {
             width: 100%; background: #0d0d12;
-            border-radius: var(--radius); padding: 10px;
-            box-sizing: border-box; border: 1px solid #2d2d3d;
-            overflow-x: auto;
+            border-radius: 8px; padding: 10px;
+            border: 1px solid #2d2d3d; overflow-x: auto;
         }
+        .sync-grid { display: grid; gap: var(--gap); width: max-content; }
 
-        .sync-grid { 
-            display: grid; 
-            gap: var(--gap); 
-            width: max-content; 
-        }
-
-        /* ĐỒNG BỘ TẤT CẢ CÁC Ô */
         .number-box, .index-box, .row-stt, .spacer-cell {
-            width: var(--cell-size); 
-            height: var(--cell-size); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            font-weight: 700; 
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            border: 1px solid transparent; /* Tạo khung sẵn để không lệch */
+            width: var(--cell-size); height: var(--cell-size);
+            display: flex; justify-content: center; align-items: center;
+            font-weight: 700; border-radius: 4px; font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Cột STT */
         .row-stt {
-            width: var(--stt-width) !important;
-            background: #ff0000 !important;
-            color: white;
-            font-size: 12px;
-            position: sticky; left: 0; z-index: 10;
-            border: none;
+            width: var(--stt-width) !important; background: var(--danger);
+            color: white; font-size: 11px; position: sticky; left: 0; z-index: 10;
         }
+        .spacer-cell { width: var(--spacer-width) !important; background: transparent !important; }
 
-        .spacer-cell {
-            width: var(--spacer-width) !important;
-            background: transparent !important;
-            border: none;
-        }
-
-        /* Ô Header số 0 1 2 3 */
-        .index-box { 
-            color: white; 
-            font-size: 11px;
-            border: 1px solid rgba(255,255,255,0.1); /* Thêm viền nhẹ cho header giống body */
-        }
-
+        /* MÀU HEADER - TRẢ LẠI TRẠNG THÁI CŨ */
         .idx-0 { background: #ff4b1f; } .idx-1 { background: #0052D4; } 
         .idx-2 { background: #8E2DE2; } .idx-3 { background: #11998e; }
         .idx-4 { background: #f09819; } .idx-5 { background: #4568dc; }
         .idx-6 { background: #D4145A; } .idx-7 { background: #009245; }
         .idx-8 { background: #662D8C; } .idx-9 { background: #2E3192; }
 
-        /* Ô Kết quả */
-        .number-box { 
-            background: #1a1a24; 
-            color: #e1e1e6; 
-            border: 1px solid #2d2d3d; /* Viền ô kết quả */
-            font-size: 14px;
-        }
+        .number-box { background: #1a1a24; color: #e1e1e6; border: 1px solid #2d2d3d; font-size: 14px; }
+        .high { background: var(--gold) !important; color: #000 !important; }
+        .low { background: var(--green) !important; color: #000 !important; }
 
-        .high { background: var(--gold) !important; color: #000 !important; border-color: var(--gold); }
-        .low { background: var(--green) !important; color: #000 !important; border-color: var(--green); }
+        /* HIỆU ỨNG NHẤP NHÁY NHẸ NHÀNG */
+        @keyframes softBlink {
+            0%   { background-color: #1a1a24; color: #e1e1e6; }
+            50%  { background-color: var(--gold); color: #000; box-shadow: 0 0 10px var(--gold); }
+            100% { background-color: #1a1a24; color: #e1e1e6; }
+        }
+        .blink { animation: softBlink 1.5s ease-in-out infinite; z-index: 5; border: none !important; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
@@ -156,34 +117,30 @@
 <body>
 
 <div class="container">
+    <div id="status-bar"></div>
     <div class="sticky-header" id="headerWrapper">
-        <div class="header-content">
-            <div id="header-grid" class="sync-grid"></div>
-        </div>
+        <div class="header-content"><div id="header-grid" class="sync-grid"></div></div>
     </div>
 
     <div class="controls">
         <div class="row">
-            <div class="control-group">
-                <label>Dữ liệu số (.txt)</label>
+            <div class="control-group" style="flex: 1.5;">
+                <label>Dữ liệu (.txt)</label>
                 <input type="file" id="fileInput" accept=".txt">
             </div>
             <div class="control-group">
-                <label>Số cột hiển thị (X)</label>
-                <input type="number" id="rowLength" value="10">
+                <label>Số cột (X)</label>
+                <input type="number" id="rowLength" value="2">
+            </div>
+            <div class="control-group">
+                <label>Bước nhảy (k)</label>
+                <input type="number" id="stepK" value="1" min="1">
             </div>
         </div>
-        <div class="control-group">
-            <label>Quy tắc T1 (A:>=5, B:<5)</label>
-            <div class="btn-group">
-                <input type="text" id="t1Input" style="flex: 2;" placeholder="Ví dụ: AAAbbb">
-                <button class="main-btn btn-apply" onclick="applyT1()">ÁP DỤNG</button>
-            </div>
-        </div>
-        <div class="btn-group">
-            <button class="main-btn btn-apply" style="background:var(--gold); color:#000" onclick="processData('big')">TÔ SỐ LỚN</button>
-            <button class="main-btn btn-apply" style="background:var(--green); color:#000" onclick="processData('small')">TÔ SỐ NHỎ</button>
-            <button class="main-btn btn-reset" onclick="clearMemory()">DỌN CACHE</button>
+        <div class="row" style="justify-content: center; gap: 10px; border-top: 1px solid #333; padding-top: 10px;">
+            <button id="btn-stepK" class="main-btn" style="background:var(--primary); color:white;" onclick="setMode('stepK')">SOI BƯỚC K</button>
+            <button id="btn-big" class="main-btn" style="background:var(--gold); color:#000;" onclick="setMode('big')">TÔ SỐ LỚN</button>
+            <button id="btn-small" class="main-btn" style="background:var(--green); color:#000;" onclick="setMode('small')">TÔ SỐ NHỎ</button>
         </div>
     </div>
 
@@ -195,21 +152,19 @@
 <script>
     const fileInput = document.getElementById('fileInput');
     const rowLengthInput = document.getElementById('rowLength');
-    const t1Input = document.getElementById('t1Input');
-    const headerGrid = document.getElementById('header-grid');
+    const stepKInput = document.getElementById('stepK');
+    const statusBar = document.getElementById('status-bar');
     const resultGrid = document.getElementById('result-grid');
-    const resultContainer = document.getElementById('result-container');
-    const headerWrapper = document.getElementById('headerWrapper');
 
-    let currentNumbers = []; 
+    let currentNumbers = [];
 
-    resultContainer.addEventListener('scroll', () => {
-        headerWrapper.scrollLeft = resultContainer.scrollLeft;
+    [rowLengthInput, stepKInput].forEach(el => {
+        el.addEventListener('input', () => { if(currentNumbers.length > 0) refreshAll(); });
     });
 
     window.onload = function() {
-        rowLengthInput.value = localStorage.getItem('userRowLength') || 10;
-        t1Input.value = localStorage.getItem('userT1') || 'AAAb';
+        rowLengthInput.value = localStorage.getItem('userRowLength') || 2;
+        stepKInput.value = localStorage.getItem('userStepK') || 1;
         const savedData = localStorage.getItem('userCurrentNumbers');
         if (savedData) {
             currentNumbers = JSON.parse(savedData);
@@ -218,26 +173,26 @@
         updateHeaderGrid();
     };
 
-    function clearMemory() {
-        localStorage.clear(); location.reload();
+    function showStatus(text, type) {
+        statusBar.textContent = text;
+        statusBar.className = 'status-' + type;
+        statusBar.style.display = 'block';
+    }
+
+    function setMode(mode) {
+        localStorage.setItem('userLastMode', mode);
+        document.querySelectorAll('.main-btn').forEach(btn => btn.classList.remove('active-mode'));
+        if(document.getElementById('btn-' + mode)) document.getElementById('btn-' + mode).classList.add('active-mode');
+        refreshAll();
     }
 
     function refreshAll() {
-        const x = parseInt(rowLengthInput.value) || 10;
-        const mode = localStorage.getItem('userLastMode') || 't1';
+        const x = parseInt(rowLengthInput.value) || 2;
+        const k = parseInt(stepKInput.value) || 1;
+        localStorage.setItem('userRowLength', x);
+        localStorage.setItem('userStepK', k);
         updateHeaderGrid();
-        renderGrid(currentNumbers, x, mode);
-    }
-
-    function applyT1() {
-        localStorage.setItem('userT1', t1Input.value.trim());
-        localStorage.setItem('userLastMode', 't1');
-        refreshAll();
-    }
-
-    function processData(mode) {
-        localStorage.setItem('userLastMode', mode);
-        refreshAll();
+        renderGrid(currentNumbers, x);
     }
 
     fileInput.addEventListener('change', function() {
@@ -251,77 +206,72 @@
         reader.readAsText(this.files[0]);
     });
 
-    rowLengthInput.addEventListener('input', () => {
-        localStorage.setItem('userRowLength', rowLengthInput.value);
-        refreshAll();
-    });
-
     function updateHeaderGrid() {
-        const x = parseInt(rowLengthInput.value) || 10;
+        const x = parseInt(rowLengthInput.value) || 2;
+        const headerGrid = document.getElementById('header-grid');
         headerGrid.style.gridTemplateColumns = `var(--stt-width) var(--spacer-width) repeat(${x}, var(--cell-size))`;
-        headerGrid.innerHTML = '';
-        
-        const sttEmpty = document.createElement('div');
-        sttEmpty.className = 'row-stt';
-        sttEmpty.style.background = 'transparent';
-        headerGrid.appendChild(sttEmpty);
-
-        const spacerEmpty = document.createElement('div');
-        spacerEmpty.className = 'spacer-cell';
-        headerGrid.appendChild(spacerEmpty);
-
+        headerGrid.innerHTML = '<div class="row-stt" style="background:transparent!important"></div><div class="spacer-cell"></div>';
         for (let i = 0; i < x; i++) {
             const box = document.createElement('div');
-            box.className = `index-box idx-${i % 10}`;
+            box.className = `index-box idx-${i % 10}`; // Trả lại class màu sắc
             box.textContent = i % 10;
             headerGrid.appendChild(box);
         }
     }
 
-    function renderGrid(data, columns, mode) {
-        resultGrid.innerHTML = ''; 
+    function renderGrid(data, columns) {
+        resultGrid.innerHTML = '';
         if (data.length === 0) return;
         
-        resultGrid.style.gridTemplateColumns = `var(--stt-width) var(--spacer-width) repeat(${columns}, var(--cell-size))`;
+        const mode = localStorage.getItem('userLastMode') || 'stepK';
+        const k = parseInt(stepKInput.value) || 1;
         
-        const T1 = t1Input.value.trim().toUpperCase() || 'AAAb';
-        const t1Len = T1.length;
-        const isYellow = new Array(data.length).fill(false);
+        resultGrid.style.gridTemplateColumns = `var(--stt-width) var(--spacer-width) repeat(${columns}, var(--cell-size))`;
+        const rows = [];
+        for (let i = 0; i < data.length; i += columns) { rows.push(data.slice(i, i + columns)); }
 
-        if (mode === 't1') {
-            const reversedMap = data.map((num, i) => {
-                const char = T1[i % t1Len];
-                return char === 'A' ? num < 5 : num >= 5;
-            });
-            for (let i = 0; i <= data.length - 5; i++) {
-                if (reversedMap.slice(i, i+5).every(v => v)) {
-                    for (let j = 0; j < 5; j++) isYellow[i+j] = true;
+        const markMap = Array.from({ length: rows.length }, () => Array(columns).fill(''));
+        let matchCount = 0;
+
+        if (mode === 'stepK') {
+            for (let r = 0; r < rows.length - k; r++) {
+                const rowUpper = rows[r];
+                const rowLower = rows[r + k];
+
+                if (rowUpper.length === columns && rowLower.length === columns) {
+                    let allColsReverse = true;
+                    for (let c = 0; c < columns; c++) {
+                        if ((rowUpper[c] >= 5) === (rowLower[c] >= 5)) {
+                            allColsReverse = false;
+                            break;
+                        }
+                    }
+
+                    if (allColsReverse) {
+                        matchCount++;
+                        for (let c = 0; c < columns; c++) {
+                            markMap[r][c] = 'blink';
+                            markMap[r+k][c] = 'blink';
+                        }
+                    }
                 }
             }
+            showStatus(matchCount > 0 ? "Tìm thấy " + matchCount + " cặp hàng ngược nhau!" : "Không có hàng nào ngược nhau.", matchCount > 0 ? "success" : "info");
         }
 
         const fragment = document.createDocumentFragment();
-        data.forEach((num, index) => {
-            if (index % columns === 0) {
-                const sttBox = document.createElement('div');
-                sttBox.className = 'row-stt';
-                sttBox.textContent = (index / columns) + 1;
-                fragment.appendChild(sttBox);
-                
-                const spacer = document.createElement('div');
-                spacer.className = 'spacer-cell';
-                fragment.appendChild(spacer);
-            }
-
-            const box = document.createElement('div');
-            box.className = 'number-box';
-            box.textContent = num;
-            
-            if (mode === 't1' && isYellow[index]) box.classList.add('high');
-            else if (mode === 'big' && num >= 5) box.classList.add('high');
-            else if (mode === 'small' && num < 5) box.classList.add('low');
-            
-            fragment.appendChild(box);
+        rows.forEach((rowData, rIndex) => {
+            fragment.appendChild(Object.assign(document.createElement('div'), {className:'row-stt', textContent:rIndex+1}));
+            fragment.appendChild(Object.assign(document.createElement('div'), {className:'spacer-cell'}));
+            rowData.forEach((num, cIndex) => {
+                const box = document.createElement('div');
+                box.className = 'number-box'; box.textContent = num;
+                if (markMap[rIndex][cIndex] === 'blink') box.classList.add('blink');
+                else if (mode === 'big' && num >= 5) box.classList.add('high');
+                else if (mode === 'small' && num < 5) box.classList.add('low');
+                fragment.appendChild(box);
+            });
+            for(let i = rowData.length; i < columns; i++) fragment.appendChild(Object.assign(document.createElement('div'), {className:'number-box'}));
         });
         resultGrid.appendChild(fragment);
     }
