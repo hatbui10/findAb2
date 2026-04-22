@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tim T1klv3 - Updated</title>
+    <title>tim T1klv3 - Updated Colors</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Inter:wght@400;600;800&display=swap');
 
@@ -12,6 +12,7 @@
             --text-main: #e1e1e6; --primary: #3d5afe; --gold: #ffcc00;
             --green: #00e676; --danger: #ff5252; --cell-size: 35px; 
             --stt-width: 45px; --spacer-width: 10px; --gap: 3px;
+            --sky-blue: #00d2ff; /* Màu xanh da trời cho hàng R */
         }
 
         * { box-sizing: border-box; }
@@ -59,6 +60,7 @@
         input {
             background: var(--input-bg); border: 1px solid #333; border-radius: 6px;
             padding: 10px; color: white; font-family: 'JetBrains Mono', monospace; font-size: 14px;
+            width: 100%;
         }
         input[readonly] { background: #12121a; color: var(--gold); border-color: #444; cursor: default; }
 
@@ -82,6 +84,11 @@
         }
         .row-stt { width: var(--stt-width) !important; background: var(--danger); color: white; font-size: 11px; }
         .number-box { background: #1a1a24; color: #e1e1e6; border: 1px solid #2d2d3d; font-size: 16px; }
+        
+        /* Màu cho hàng R và R1 */
+        .row-r-base { background: var(--sky-blue) !important; color: #000 !important; }
+        .row-r1-found { background: var(--gold) !important; color: #000 !important; }
+
         .high { background: var(--gold) !important; color: #000 !important; }
         .low { background: var(--green) !important; color: #000 !important; }
 
@@ -139,6 +146,21 @@
             <div class="group"><label>Bước Nhảy (K)</label><input type="number" id="stepK" value="1" onchange="refresh()"></div>
         </div>
 
+        <div class="control-row">
+            <div class="group" style="flex: 1;">
+                <label>Ô G (STT Hàng R)</label>
+                <input type="number" id="inputG" placeholder="STT R...">
+            </div>
+            <div class="group" style="flex: 0.5;">
+                <label>Tìm Kiếm</label>
+                <button class="main-btn" style="background: var(--primary); color: white; height: 38px;" onclick="searchReverseG()">G1</button>
+            </div>
+            <div class="group" style="flex: 1;">
+                <label>Ô P (Khoảng Cách)</label>
+                <input type="text" id="outputP" readonly placeholder="...">
+            </div>
+        </div>
+
         <div class="btn-grid">
             <button id="btn-stepK" class="main-btn" style="background:var(--primary); color:white;" onclick="setMode('stepK')">SOI BƯỚC K</button>
             <button id="btn-big" class="main-btn" style="background:var(--gold); color:#000;" onclick="setMode('big')">TÔ SỐ LỚN</button>
@@ -162,11 +184,14 @@
           resultContainer = document.getElementById('result-container'),
           headerWrapper = document.getElementById('header-wrapper'),
           listItems = document.getElementById('list-items'),
-          searchResults = document.getElementById('search-results');
+          searchResults = document.getElementById('search-results'),
+          inputG = document.getElementById('inputG'),
+          outputP = document.getElementById('outputP');
 
     let currentNumbers = [];
+    let highlightR = -1;
+    let highlightR1 = -1;
 
-    // Đồng bộ cuộn Header
     resultContainer.addEventListener('scroll', () => {
         headerWrapper.scrollLeft = resultContainer.scrollLeft;
     });
@@ -183,28 +208,22 @@
         }
     }
 
-    // TẢI DỮ LIỆU TỪ LOCALSTORAGE KHI MỞ TRANG
     window.onload = function() {
         rowLengthInput.value = localStorage.getItem('userX') || 2;
         stepKInput.value = localStorage.getItem('userK') || 1;
-        
         const savedNums = localStorage.getItem('userNums');
         if (savedNums) { 
             currentNumbers = JSON.parse(savedNums); 
             totalCharsInput.value = currentNumbers.length;
         }
-
         const savedMode = localStorage.getItem('userMode') || 'stepK';
         updateActiveButton(savedMode);
-        
         if (currentNumbers.length > 0) refresh();
     };
 
-    // ĐỌC FILE VÀ LƯU VÀO LOCALSTORAGE
     fileInput.onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
-        
         const reader = new FileReader();
         reader.onload = function(event) {
             currentNumbers = event.target.result.replace(/[^0-9]/g, '').split('').map(Number);
@@ -222,6 +241,7 @@
     }
 
     function setMode(mode) {
+        highlightR = -1; highlightR1 = -1; outputP.value = '';
         localStorage.setItem('userMode', mode);
         updateActiveButton(mode);
         refresh();
@@ -230,10 +250,8 @@
     function refresh() {
         const x = parseInt(rowLengthInput.value) || 2;
         const k = parseInt(stepKInput.value) || 1;
-        
         localStorage.setItem('userX', x); 
         localStorage.setItem('userK', k);
-        
         updateHeader(x); 
         render(x, k);
     }
@@ -289,6 +307,41 @@
         return u;
     }
 
+    function searchReverseG() {
+        const rIdx = parseInt(inputG.value) - 1;
+        const x = parseInt(rowLengthInput.value) || 2;
+        if (!currentNumbers.length) return alert("Chưa có dữ liệu!");
+        
+        const rows = [];
+        for (let i = 0; i < currentNumbers.length; i += x) rows.push(currentNumbers.slice(i, i + x));
+        
+        if (rIdx < 0 || rIdx >= rows.length) return alert("STT hàng không hợp lệ!");
+        
+        const targetRow = rows[rIdx];
+        highlightR = rIdx; 
+        highlightR1 = -1;
+        outputP.value = '';
+
+        for (let i = rIdx + 1; i < rows.length; i++) {
+            if (rows[i].length === x) {
+                let isAllReverse = true;
+                for (let c = 0; c < x; c++) {
+                    if ((targetRow[c] >= 5) === (rows[i][c] >= 5)) {
+                        isAllReverse = false;
+                        break;
+                    }
+                }
+                if (isAllReverse) {
+                    highlightR1 = i;
+                    outputP.value = i - rIdx;
+                    break;
+                }
+            }
+        }
+        if (highlightR1 === -1) alert("Không tìm thấy hàng R1 ngược hoàn toàn!");
+        refresh();
+    }
+
     function render(x, k) {
         resultGrid.innerHTML = ''; 
         if (!currentNumbers.length) return;
@@ -314,9 +367,6 @@
                     }
                 }
             }
-            showStatus(count > 0 ? `Tìm thấy ${count} cặp ngược nhau!` : "Không tìm thấy cặp ngược ở bước K này.", count > 0 ? "success" : "info");
-        } else {
-            statusBar.style.display = 'none';
         }
 
         const frag = document.createDocumentFragment();
@@ -325,15 +375,19 @@
             stt.className = 'row-stt'; 
             stt.textContent = rIdx + 1;
             frag.appendChild(stt); 
-            
-            frag.appendChild(document.createElement('div')); // Spacer
+            frag.appendChild(document.createElement('div')); 
 
             row.forEach((n, cIdx) => {
                 const box = document.createElement('div'); 
                 box.className = 'number-box'; 
                 box.textContent = n;
                 
-                if (marks[rIdx][cIdx] === 'blink') {
+                // Quy tắc ưu tiên tô màu
+                if (rIdx === highlightR) {
+                    box.classList.add('row-r-base'); // Màu xanh da trời cho hàng R
+                } else if (rIdx === highlightR1) {
+                    box.classList.add('row-r1-found'); // Màu vàng cho hàng R1
+                } else if (marks[rIdx][cIdx] === 'blink') {
                     box.classList.add('blink');
                 } else if (mode === 'big' && n >= 5) {
                     box.classList.add('high');
@@ -343,7 +397,6 @@
                 frag.appendChild(box);
             });
             
-            // Điền nốt các ô trống nếu hàng cuối không đủ cột
             for (let i = row.length; i < x; i++) {
                 const empty = document.createElement('div');
                 empty.className = 'number-box';
