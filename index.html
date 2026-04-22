@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tim T1klv3 - Updated Colors</title>
+    <title>tim T1klv3 - Final Update</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Inter:wght@400;600;800&display=swap');
 
@@ -12,7 +12,7 @@
             --text-main: #e1e1e6; --primary: #3d5afe; --gold: #ffcc00;
             --green: #00e676; --danger: #ff5252; --cell-size: 35px; 
             --stt-width: 45px; --spacer-width: 10px; --gap: 3px;
-            --sky-blue: #00d2ff; /* Màu xanh da trời cho hàng R */
+            --sky-blue: #00d2ff;
         }
 
         * { box-sizing: border-box; }
@@ -85,7 +85,6 @@
         .row-stt { width: var(--stt-width) !important; background: var(--danger); color: white; font-size: 11px; }
         .number-box { background: #1a1a24; color: #e1e1e6; border: 1px solid #2d2d3d; font-size: 16px; }
         
-        /* Màu cho hàng R và R1 */
         .row-r-base { background: var(--sky-blue) !important; color: #000 !important; }
         .row-r1-found { background: var(--gold) !important; color: #000 !important; }
 
@@ -156,7 +155,7 @@
                 <button class="main-btn" style="background: var(--primary); color: white; height: 38px;" onclick="searchReverseG()">G1</button>
             </div>
             <div class="group" style="flex: 1;">
-                <label>Ô P (Khoảng Cách)</label>
+                <label>Ô P (Kết Quả)</label>
                 <input type="text" id="outputP" readonly placeholder="...">
             </div>
         </div>
@@ -333,7 +332,8 @@
                 }
                 if (isAllReverse) {
                     highlightR1 = i;
-                    outputP.value = i - rIdx;
+                    // Cập nhật hiển thị ô P: [Khoảng cách] vị trí [STT hàng tìm được]
+                    outputP.value = `câch ${i - rIdx} dòng --- ở STT ${i + 1}`;
                     break;
                 }
             }
@@ -352,7 +352,6 @@
         const rows = [];
         for (let i = 0; i < currentNumbers.length; i += x) rows.push(currentNumbers.slice(i, i + x));
         const marks = Array.from({length: rows.length}, () => Array(x).fill(''));
-        let count = 0;
 
         if (mode === 'stepK') {
             for (let r = 0; r < rows.length - k; r++) {
@@ -362,7 +361,6 @@
                         if ((rows[r][c] >= 5) === (rows[r+k][c] >= 5)) { isRev = false; break; } 
                     }
                     if (isRev) { 
-                        count++; 
                         for (let c = 0; c < x; c++) marks[r][c] = marks[r+k][c] = 'blink'; 
                     }
                 }
@@ -382,11 +380,10 @@
                 box.className = 'number-box'; 
                 box.textContent = n;
                 
-                // Quy tắc ưu tiên tô màu
                 if (rIdx === highlightR) {
-                    box.classList.add('row-r-base'); // Màu xanh da trời cho hàng R
+                    box.classList.add('row-r-base'); 
                 } else if (rIdx === highlightR1) {
-                    box.classList.add('row-r1-found'); // Màu vàng cho hàng R1
+                    box.classList.add('row-r1-found'); 
                 } else if (marks[rIdx][cIdx] === 'blink') {
                     box.classList.add('blink');
                 } else if (mode === 'big' && n >= 5) {
